@@ -83,10 +83,7 @@ public class Main {
         // テクスチャ
         // =========================
 
-        Texture blockTexture =
-                new Texture(
-                        "src/main/resources/textures/blocks/stone.png"
-                );
+        Blocks.init();
 
         // =========================
         // マウス
