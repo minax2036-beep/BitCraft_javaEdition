@@ -20,7 +20,7 @@ public class Main {
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 3);
         GLFW.glfwWindowHint(
                 GLFW.GLFW_OPENGL_PROFILE,
-                GLFW.GLFW_OPENGL_CORE_PROFILE
+                GLFW.GLFW_OPENGL_COMPAT_PROFILE
         );
 
         // ウィンドウを作る
@@ -49,7 +49,10 @@ public class Main {
         // OpenGLの機能をLWJGLから使えるようにする
         GL.createCapabilities();
 
-        // 背景色を設定する
+        // 深度テストを有効にする
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+
+        // 背景色
         GL11.glClearColor(
                 0.2f,
                 0.6f,
@@ -57,23 +60,48 @@ public class Main {
                 1.0f
         );
 
+        // 3D表示用の設定
+        GL11.glMatrixMode(GL11.GL_PROJECTION);
+        GL11.glLoadIdentity();
+
+        GL11.glOrtho(
+                -2.0,
+                2.0,
+                -2.0,
+                2.0,
+                -10.0,
+                10.0
+        );
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+
         // ゲームループ
         while (!GLFW.glfwWindowShouldClose(window)) {
 
-            // 画面を背景色で消去する
-            GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
+            // 画面と深度バッファを消去
+            GL11.glClear(
+                    GL11.GL_COLOR_BUFFER_BIT |
+                    GL11.GL_DEPTH_BUFFER_BIT
+            );
 
-            // 描画結果を画面に表示する
+            // カメラを少し引く
+            GL11.glLoadIdentity();
+            GL11.glTranslatef(0.0f, 0.0f, -1.5f);
+
+            // ブロックを描画
+            BlockRenderer.renderBlock();
+
+            // 描画結果を表示
             GLFW.glfwSwapBuffers(window);
 
-            // キーボードやマウスなどのイベントを処理する
+            // イベント処理
             GLFW.glfwPollEvents();
         }
 
-        // ウィンドウを破棄する
+        // ウィンドウを破棄
         GLFW.glfwDestroyWindow(window);
 
-        // GLFWを終了する
+        // GLFWを終了
         GLFW.glfwTerminate();
 
         System.out.println("BitCraft closed.");
