@@ -216,8 +216,6 @@ BlockRenderer.renderBlock(
         // 終了処理
         // =========================
 
-        blockTexture.delete();
-
         GLFW.glfwDestroyWindow(window);
 
         GLFW.glfwTerminate();
