@@ -4,6 +4,9 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.stb.STBImage;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -11,7 +14,7 @@ public class Texture {
 
     private final int id;
 
-    public Texture(String path) {
+    public Texture(String resourcePath) {
 
         IntBuffer width = BufferUtils.createIntBuffer(1);
         IntBuffer height = BufferUtils.createIntBuffer(1);
@@ -19,8 +22,10 @@ public class Texture {
 
         STBImage.stbi_set_flip_vertically_on_load(true);
 
-        ByteBuffer image = STBImage.stbi_load(
-                path,
+        ByteBuffer imageData = loadResource(resourcePath);
+
+        ByteBuffer image = STBImage.stbi_load_from_memory(
+                imageData,
                 width,
                 height,
                 channels,
@@ -29,7 +34,7 @@ public class Texture {
 
         if (image == null) {
             throw new RuntimeException(
-                    "Texture loading failed: " + path
+                    "Texture loading failed: " + resourcePath
             );
         }
 
@@ -67,13 +72,55 @@ public class Texture {
 
         System.out.println(
                 "Loaded texture: " +
-                path +
+                resourcePath +
                 " (" +
                 width.get(0) +
                 "x" +
                 height.get(0) +
                 ")"
         );
+    }
+
+    private static ByteBuffer loadResource(String resourcePath) {
+
+        try (InputStream input =
+                     Texture.class.getResourceAsStream(resourcePath)) {
+
+            if (input == null) {
+                throw new RuntimeException(
+                        "Resource not found: " + resourcePath
+                );
+            }
+
+            ByteArrayOutputStream output =
+                    new ByteArrayOutputStream();
+
+            byte[] buffer = new byte[8192];
+
+            int bytesRead;
+
+            while ((bytesRead = input.read(buffer)) != -1) {
+                output.write(buffer, 0, bytesRead);
+            }
+
+            byte[] data = output.toByteArray();
+
+            ByteBuffer byteBuffer =
+                    BufferUtils.createByteBuffer(data.length);
+
+            byteBuffer.put(data);
+            byteBuffer.flip();
+
+            return byteBuffer;
+
+        } catch (IOException e) {
+
+            throw new RuntimeException(
+                    "Failed to load resource: " +
+                    resourcePath,
+                    e
+            );
+        }
     }
 
     public void bind() {
