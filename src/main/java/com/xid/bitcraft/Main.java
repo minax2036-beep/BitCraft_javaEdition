@@ -13,6 +13,8 @@ public class Main {
 
     private static boolean firstMouse = true;
 
+    private static boolean mouseCaptured = true;
+
     public static void main(String[] args) {
 
         System.out.println("BitCraft starting...");
@@ -86,7 +88,7 @@ public class Main {
         Blocks.init();
 
         // =========================
-        // マウス
+        // マウス初期状態
         // =========================
 
         GLFW.glfwSetInputMode(
@@ -95,9 +97,17 @@ public class Main {
                 GLFW.GLFW_CURSOR_DISABLED
         );
 
+        // =========================
+        // マウス移動
+        // =========================
+
         GLFW.glfwSetCursorPosCallback(
                 window,
                 (windowHandle, mouseX, mouseY) -> {
+
+                    if (!mouseCaptured) {
+                        return;
+                    }
 
                     if (firstMouse) {
 
@@ -128,6 +138,71 @@ public class Main {
         );
 
         // =========================
+        // キーボード
+        // =========================
+
+        GLFW.glfwSetKeyCallback(
+                window,
+                (windowHandle, key, scancode, action, mods) -> {
+
+                    if (key == GLFW.GLFW_KEY_ESCAPE
+                            && action == GLFW.GLFW_PRESS) {
+
+                        mouseCaptured = !mouseCaptured;
+
+                        if (mouseCaptured) {
+
+                            // マウスを再捕捉
+                            GLFW.glfwSetInputMode(
+                                    windowHandle,
+                                    GLFW.GLFW_CURSOR,
+                                    GLFW.GLFW_CURSOR_DISABLED
+                            );
+
+                            // 再捕捉直後の急激なカメラ移動を防ぐ
+                            firstMouse = true;
+
+                        } else {
+
+                            // マウスを解放
+                            GLFW.glfwSetInputMode(
+                                    windowHandle,
+                                    GLFW.GLFW_CURSOR,
+                                    GLFW.GLFW_CURSOR_NORMAL
+                            );
+
+                            firstMouse = true;
+                        }
+                    }
+                }
+        );
+
+        // =========================
+        // マウスクリック
+        // =========================
+
+        GLFW.glfwSetMouseButtonCallback(
+                window,
+                (windowHandle, button, action, mods) -> {
+
+                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT
+                            && action == GLFW.GLFW_PRESS
+                            && !mouseCaptured) {
+
+                        mouseCaptured = true;
+
+                        GLFW.glfwSetInputMode(
+                                windowHandle,
+                                GLFW.GLFW_CURSOR,
+                                GLFW.GLFW_CURSOR_DISABLED
+                        );
+
+                        firstMouse = true;
+                    }
+                }
+        );
+
+        // =========================
         // メインループ
         // =========================
 
@@ -138,7 +213,10 @@ public class Main {
                     GL11.GL_DEPTH_BUFFER_BIT
             );
 
+            // =========================
             // 透視投影
+            // =========================
+
             GL11.glMatrixMode(
                     GL11.GL_PROJECTION
             );
@@ -171,14 +249,20 @@ public class Main {
                     far
             );
 
+            // =========================
             // モデルビュー
+            // =========================
+
             GL11.glMatrixMode(
                     GL11.GL_MODELVIEW
             );
 
             GL11.glLoadIdentity();
 
+            // =========================
             // カメラ回転
+            // =========================
+
             GL11.glRotatef(
                     -camera.getPitch(),
                     1.0f,
@@ -193,20 +277,32 @@ public class Main {
                     0.0f
             );
 
+            // =========================
             // カメラ位置
+            // =========================
+
             GL11.glTranslatef(
                     -camera.getX(),
                     -camera.getY(),
                     -camera.getZ()
             );
 
+            // =========================
+            // ブロック描画
+            // =========================
+
             Block block = Blocks.STONE;
 
-BlockRenderer.renderBlock(
-        block.getTopTexture(),
-        block.getBottomTexture(),
-        block.getSideTexture()
-);
+            BlockRenderer.renderBlock(
+                    block.getTopTexture(),
+                    block.getBottomTexture(),
+                    block.getSideTexture()
+            );
+
+            // =========================
+            // 表示
+            // =========================
+
             GLFW.glfwSwapBuffers(window);
 
             GLFW.glfwPollEvents();
