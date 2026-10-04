@@ -26,10 +26,9 @@ public class Blocks {
 
     public static void init() {
 
-        // 石
         Texture stone =
                 new Texture(
-                        "src/main/resources/textures/blocks/stone.png"
+                        "/textures/blocks/stone.png"
                 );
 
         STONE = new Block(
@@ -39,10 +38,10 @@ public class Blocks {
 
         register("stone", STONE);
 
-        // 土
+
         Texture dirt =
                 new Texture(
-                        "src/main/resources/textures/blocks/dirt.png"
+                        "/textures/blocks/dirt.png"
                 );
 
         DIRT = new Block(
@@ -52,15 +51,15 @@ public class Blocks {
 
         register("dirt", DIRT);
 
-        // 草
+
         Texture grassTop =
                 new Texture(
-                        "src/main/resources/textures/blocks/grass_top.png"
+                        "/textures/blocks/grass_top.png"
                 );
 
         Texture grassSide =
                 new Texture(
-                        "src/main/resources/textures/blocks/grass_side.png"
+                        "/textures/blocks/grass_side.png"
                 );
 
         GRASS = new Block(
@@ -72,15 +71,15 @@ public class Blocks {
 
         register("grass", GRASS);
 
-        // 木
+
         Texture woodTop =
                 new Texture(
-                        "src/main/resources/textures/blocks/wood_top.png"
+                        "/textures/blocks/wood_top.png"
                 );
 
         Texture woodSide =
                 new Texture(
-                        "src/main/resources/textures/blocks/wood_side.png"
+                        "/textures/blocks/wood_side.png"
                 );
 
         WOOD = new Block(
