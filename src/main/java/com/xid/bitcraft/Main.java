@@ -200,13 +200,13 @@ public class Main {
                     -camera.getZ()
             );
 
-            // ブロック描画
-            BlockRenderer.renderBlock(
-                    blockTexture,
-                    blockTexture,
-                    blockTexture
-            );
+            Block block = Blocks.STONE;
 
+BlockRenderer.renderBlock(
+        block.getTopTexture(),
+        block.getBottomTexture(),
+        block.getSideTexture()
+);
             GLFW.glfwSwapBuffers(window);
 
             GLFW.glfwPollEvents();
