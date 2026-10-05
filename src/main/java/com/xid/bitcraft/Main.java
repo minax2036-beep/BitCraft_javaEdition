@@ -12,16 +12,14 @@ public class Main {
 
         System.out.println("BitCraft starting...");
 
+        // GLFW初期化
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException(
                     "GLFW initialization failed."
             );
         }
 
-        // =========================
-        // ウィンドウ設定
-        // =========================
-
+        // OpenGL 3.3
         GLFW.glfwWindowHint(
                 GLFW.GLFW_CONTEXT_VERSION_MAJOR,
                 3
@@ -32,29 +30,29 @@ public class Main {
                 3
         );
 
+        // 今はOpenGLの固定機能を使うのでCompatibility Profile
         GLFW.glfwWindowHint(
                 GLFW.GLFW_OPENGL_PROFILE,
                 GLFW.GLFW_OPENGL_COMPAT_PROFILE
         );
 
-        // タイトルバー・×ボタン
+        // ウィンドウ設定
         GLFW.glfwWindowHint(
                 GLFW.GLFW_DECORATED,
                 GLFW.GLFW_TRUE
         );
 
-        // ウィンドウサイズ変更可能
         GLFW.glfwWindowHint(
                 GLFW.GLFW_RESIZABLE,
                 GLFW.GLFW_TRUE
         );
 
-        // 最大化しない
         GLFW.glfwWindowHint(
                 GLFW.GLFW_MAXIMIZED,
                 GLFW.GLFW_FALSE
         );
 
+        // ウィンドウ作成
         long window = GLFW.glfwCreateWindow(
                 1280,
                 720,
@@ -64,7 +62,6 @@ public class Main {
         );
 
         if (window == 0) {
-
             GLFW.glfwTerminate();
 
             throw new IllegalStateException(
@@ -72,6 +69,7 @@ public class Main {
             );
         }
 
+        // ウィンドウ装飾を有効化
         GLFW.glfwSetWindowAttrib(
                 window,
                 GLFW.GLFW_DECORATED,
@@ -80,22 +78,29 @@ public class Main {
 
         GLFW.glfwRestoreWindow(window);
 
+        // OpenGLコンテキストを現在のスレッドに設定
         GLFW.glfwMakeContextCurrent(window);
 
+        // VSync
         GLFW.glfwSwapInterval(1);
 
+        // ウィンドウ表示
         GLFW.glfwShowWindow(window);
 
+        // OpenGL機能を初期化
         GL.createCapabilities();
 
-        // =========================
-        // OpenGL設定
-        // =========================
+        // 深度テスト
+        GL11.glEnable(
+                GL11.GL_DEPTH_TEST
+        );
 
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        // テクスチャ
+        GL11.glEnable(
+                GL11.GL_TEXTURE_2D
+        );
 
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
-
+        // 背景色
         GL11.glClearColor(
                 0.2f,
                 0.6f,
@@ -103,22 +108,13 @@ public class Main {
                 1.0f
         );
 
-        // =========================
         // カメラ
-        // =========================
-
         camera = new Camera();
 
-        // =========================
-        // テクスチャ
-        // =========================
-
+        // ブロック登録
         Blocks.init();
 
-        // =========================
         // ESCで終了
-        // =========================
-
         GLFW.glfwSetKeyCallback(
                 window,
                 (windowHandle, key, scancode, action, mods) -> {
@@ -134,16 +130,16 @@ public class Main {
                 }
         );
 
-        // =========================
         // メインループ
-        // =========================
-
         while (!GLFW.glfwWindowShouldClose(window)) {
 
-            // =========================
-            // カメラ操作テスト
-            // =========================
+            /*
+             * ========================================
+             * 入力
+             * ========================================
+             */
 
+            // カメラ回転速度
             float cameraSpeed = 1.0f;
 
             // 左
@@ -194,18 +190,57 @@ public class Main {
                 );
             }
 
-            // =========================
-            // 画面クリア
-            // =========================
+            /*
+             * ========================================
+             * 画面クリア
+             * ========================================
+             */
 
             GL11.glClear(
-                    GL11.GL_COLOR_BUFFER_BIT |
-                    GL11.GL_DEPTH_BUFFER_BIT
+                    GL11.GL_COLOR_BUFFER_BIT
+                            | GL11.GL_DEPTH_BUFFER_BIT
             );
 
-            // =========================
-            // 透視投影
-            // =========================
+            /*
+             * ========================================
+             * ウィンドウサイズ取得
+             * ========================================
+             */
+
+            int[] width = new int[1];
+            int[] height = new int[1];
+
+            GLFW.glfwGetFramebufferSize(
+                    window,
+                    width,
+                    height
+            );
+
+            int framebufferWidth = width[0];
+            int framebufferHeight = height[0];
+
+            if (framebufferHeight == 0) {
+                framebufferHeight = 1;
+            }
+
+            /*
+             * ========================================
+             * Viewport
+             * ========================================
+             */
+
+            GL11.glViewport(
+                    0,
+                    0,
+                    framebufferWidth,
+                    framebufferHeight
+            );
+
+            /*
+             * ========================================
+             * Projection
+             * ========================================
+             */
 
             GL11.glMatrixMode(
                     GL11.GL_PROJECTION
@@ -214,24 +249,27 @@ public class Main {
             GL11.glLoadIdentity();
 
             float aspect =
-                    1280.0f / 720.0f;
+                    (float) framebufferWidth
+                            / (float) framebufferHeight;
 
             float fov = 70.0f;
-
             float near = 0.1f;
-
             float far = 100.0f;
 
             float top =
                     (float) Math.tan(
-                            Math.toRadians(fov / 2.0)
+                            Math.toRadians(
+                                    fov / 2.0
+                            )
                     ) * near;
 
             float bottom = -top;
 
-            float right = top * aspect;
+            float right =
+                    top * aspect;
 
-            float left = -right;
+            float left =
+                    -right;
 
             GL11.glFrustum(
                     left,
@@ -242,9 +280,11 @@ public class Main {
                     far
             );
 
-            // =========================
-            // モデルビュー
-            // =========================
+            /*
+             * ========================================
+             * Camera / View
+             * ========================================
+             */
 
             GL11.glMatrixMode(
                     GL11.GL_MODELVIEW
@@ -252,10 +292,9 @@ public class Main {
 
             GL11.glLoadIdentity();
 
-            // =========================
-            // カメラ回転
-            // =========================
-
+            /*
+             * 上下を見る
+             */
             GL11.glRotatef(
                     -camera.getPitch(),
                     1.0f,
@@ -263,6 +302,9 @@ public class Main {
                     0.0f
             );
 
+            /*
+             * 左右を見る
+             */
             GL11.glRotatef(
                     -camera.getYaw(),
                     0.0f,
@@ -270,19 +312,20 @@ public class Main {
                     0.0f
             );
 
-            // =========================
-            // カメラ位置
-            // =========================
-
+            /*
+             * カメラ位置を反映
+             */
             GL11.glTranslatef(
                     -camera.getX(),
                     -camera.getY(),
                     -camera.getZ()
             );
 
-            // =========================
-            // ブロック描画
-            // =========================
+            /*
+             * ========================================
+             * ブロック描画
+             * ========================================
+             */
 
             Block block = Blocks.STONE;
 
@@ -292,18 +335,25 @@ public class Main {
                     block.getSideTexture()
             );
 
-            // =========================
-            // 表示
-            // =========================
+            /*
+             * ========================================
+             * 画面更新
+             * ========================================
+             */
 
             GLFW.glfwSwapBuffers(window);
 
+            /*
+             * イベント処理
+             */
             GLFW.glfwPollEvents();
         }
 
-        // =========================
-        // 終了処理
-        // =========================
+        /*
+         * ========================================
+         * 終了処理
+         * ========================================
+         */
 
         GLFW.glfwDestroyWindow(window);
 
