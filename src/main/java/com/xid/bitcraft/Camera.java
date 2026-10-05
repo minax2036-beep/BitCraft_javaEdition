@@ -14,19 +14,37 @@ public class Camera {
         yaw += deltaYaw;
         pitch += deltaPitch;
 
+        // 上を向きすぎない
         if (pitch > 89.0f) {
             pitch = 89.0f;
         }
 
+        // 下を向きすぎない
         if (pitch < -89.0f) {
             pitch = -89.0f;
         }
+    }
 
-        System.out.println(
-                "Camera: yaw=" +
-                yaw +
-                ", pitch=" +
-                pitch
+    // カメラが向いている方向のX成分
+    public float getFrontX() {
+        return (float) (
+                Math.cos(Math.toRadians(pitch))
+                * Math.sin(Math.toRadians(yaw))
+        );
+    }
+
+    // カメラが向いている方向のY成分
+    public float getFrontY() {
+        return (float) (
+                Math.sin(Math.toRadians(pitch))
+        );
+    }
+
+    // カメラが向いている方向のZ成分
+    public float getFrontZ() {
+        return (float) (
+                -Math.cos(Math.toRadians(pitch))
+                * Math.cos(Math.toRadians(yaw))
         );
     }
 
@@ -48,5 +66,15 @@ public class Camera {
 
     public float getPitch() {
         return pitch;
+    }
+
+    public void setPosition(
+            float x,
+            float y,
+            float z
+    ) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
 }
