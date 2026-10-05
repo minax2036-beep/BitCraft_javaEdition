@@ -2,12 +2,10 @@ package com.xid.bitcraft;
 
 public class Camera {
 
-    // カメラの位置
     private float x = 0.0f;
     private float y = 1.5f;
     private float z = 3.0f;
 
-    // カメラの向き
     private float yaw = 0.0f;
     private float pitch = -15.0f;
 
@@ -16,7 +14,6 @@ public class Camera {
         yaw += deltaYaw;
         pitch += deltaPitch;
 
-        // 上下を見すぎないように制限
         if (pitch > 89.0f) {
             pitch = 89.0f;
         }
@@ -24,6 +21,13 @@ public class Camera {
         if (pitch < -89.0f) {
             pitch = -89.0f;
         }
+
+        System.out.println(
+                "Camera: yaw=" +
+                yaw +
+                ", pitch=" +
+                pitch
+        );
     }
 
     public float getX() {
