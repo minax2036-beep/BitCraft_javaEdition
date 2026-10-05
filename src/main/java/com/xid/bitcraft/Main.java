@@ -8,13 +8,6 @@ public class Main {
 
     private static Camera camera;
 
-    private static double lastMouseX;
-    private static double lastMouseY;
-
-    private static boolean firstMouse = true;
-
-    private static boolean mouseCaptured = false;
-
     public static void main(String[] args) {
 
         System.out.println("BitCraft starting...");
@@ -44,19 +37,19 @@ public class Main {
                 GLFW.GLFW_OPENGL_COMPAT_PROFILE
         );
 
-        // タイトルバー・×ボタンを表示
+        // タイトルバー・×ボタン
         GLFW.glfwWindowHint(
                 GLFW.GLFW_DECORATED,
                 GLFW.GLFW_TRUE
         );
 
-        // ウィンドウサイズ変更を許可
+        // ウィンドウサイズ変更可能
         GLFW.glfwWindowHint(
                 GLFW.GLFW_RESIZABLE,
                 GLFW.GLFW_TRUE
         );
 
-        // 最初から最大化しない
+        // 最大化しない
         GLFW.glfwWindowHint(
                 GLFW.GLFW_MAXIMIZED,
                 GLFW.GLFW_FALSE
@@ -79,14 +72,12 @@ public class Main {
             );
         }
 
-        // 念のため装飾を有効化
         GLFW.glfwSetWindowAttrib(
                 window,
                 GLFW.GLFW_DECORATED,
                 GLFW.GLFW_TRUE
         );
 
-        // 最大化されていた場合は解除
         GLFW.glfwRestoreWindow(window);
 
         GLFW.glfwMakeContextCurrent(window);
@@ -98,7 +89,7 @@ public class Main {
         GL.createCapabilities();
 
         // =========================
-        // OpenGL
+        // OpenGL設定
         // =========================
 
         GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -125,47 +116,7 @@ public class Main {
         Blocks.init();
 
         // =========================
-        // マウス移動
-        // =========================
-
-        GLFW.glfwSetCursorPosCallback(
-                window,
-                (windowHandle, mouseX, mouseY) -> {
-
-                    if (!mouseCaptured) {
-                        return;
-                    }
-
-                    if (firstMouse) {
-
-                        lastMouseX = mouseX;
-                        lastMouseY = mouseY;
-
-                        firstMouse = false;
-
-                        return;
-                    }
-
-                    double deltaX =
-                            mouseX - lastMouseX;
-
-                    double deltaY =
-                            mouseY - lastMouseY;
-
-                    lastMouseX = mouseX;
-                    lastMouseY = mouseY;
-
-                    float sensitivity = 0.25f;
-
-                    camera.rotate(
-                            (float) deltaX * sensitivity,
-                            (float) -deltaY * sensitivity
-                    );
-                }
-        );
-
-        // =========================
-        // キーボード
+        // ESCで終了
         // =========================
 
         GLFW.glfwSetKeyCallback(
@@ -175,68 +126,9 @@ public class Main {
                     if (key == GLFW.GLFW_KEY_ESCAPE
                             && action == GLFW.GLFW_PRESS) {
 
-                        if (mouseCaptured) {
-
-                            // マウスを解放
-                            mouseCaptured = false;
-
-                            GLFW.glfwSetInputMode(
-                                    windowHandle,
-                                    GLFW.GLFW_CURSOR,
-                                    GLFW.GLFW_CURSOR_NORMAL
-                            );
-
-                            firstMouse = true;
-
-                            System.out.println(
-                                    "Mouse released."
-                            );
-
-                        } else {
-
-                            // マウスを再捕捉
-                            mouseCaptured = true;
-
-                            GLFW.glfwSetInputMode(
-                                    windowHandle,
-                                    GLFW.GLFW_CURSOR,
-                                    GLFW.GLFW_CURSOR_DISABLED
-                            );
-
-                            firstMouse = true;
-
-                            System.out.println(
-                                    "Mouse captured."
-                            );
-                        }
-                    }
-                }
-        );
-
-        // =========================
-        // マウスクリック
-        // =========================
-
-        GLFW.glfwSetMouseButtonCallback(
-                window,
-                (windowHandle, button, action, mods) -> {
-
-                    if (button == GLFW.GLFW_MOUSE_BUTTON_LEFT
-                            && action == GLFW.GLFW_PRESS
-                            && !mouseCaptured) {
-
-                        mouseCaptured = true;
-
-                        GLFW.glfwSetInputMode(
+                        GLFW.glfwSetWindowShouldClose(
                                 windowHandle,
-                                GLFW.GLFW_CURSOR,
-                                GLFW.GLFW_CURSOR_DISABLED
-                        );
-
-                        firstMouse = true;
-
-                        System.out.println(
-                                "Mouse captured."
+                                true
                         );
                     }
                 }
@@ -247,6 +139,60 @@ public class Main {
         // =========================
 
         while (!GLFW.glfwWindowShouldClose(window)) {
+
+            // =========================
+            // カメラ操作テスト
+            // =========================
+
+            float cameraSpeed = 1.0f;
+
+            // 左
+            if (GLFW.glfwGetKey(
+                    window,
+                    GLFW.GLFW_KEY_LEFT
+            ) == GLFW.GLFW_PRESS) {
+
+                camera.rotate(
+                        -cameraSpeed,
+                        0.0f
+                );
+            }
+
+            // 右
+            if (GLFW.glfwGetKey(
+                    window,
+                    GLFW.GLFW_KEY_RIGHT
+            ) == GLFW.GLFW_PRESS) {
+
+                camera.rotate(
+                        cameraSpeed,
+                        0.0f
+                );
+            }
+
+            // 上
+            if (GLFW.glfwGetKey(
+                    window,
+                    GLFW.GLFW_KEY_UP
+            ) == GLFW.GLFW_PRESS) {
+
+                camera.rotate(
+                        0.0f,
+                        cameraSpeed
+                );
+            }
+
+            // 下
+            if (GLFW.glfwGetKey(
+                    window,
+                    GLFW.GLFW_KEY_DOWN
+            ) == GLFW.GLFW_PRESS) {
+
+                camera.rotate(
+                        0.0f,
+                        -cameraSpeed
+                );
+            }
 
             // =========================
             // 画面クリア
@@ -347,7 +293,7 @@ public class Main {
             );
 
             // =========================
-            // 画面表示
+            // 表示
             // =========================
 
             GLFW.glfwSwapBuffers(window);
