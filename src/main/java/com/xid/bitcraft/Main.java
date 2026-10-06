@@ -1,8 +1,13 @@
 package com.xid.bitcraft;
 
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
 
 public class Main {
 
@@ -14,7 +19,7 @@ public class Main {
 
         /*
          * ========================================
-         * GLFW 初期化
+         * GLFW初期化
          * ========================================
          */
 
@@ -26,7 +31,7 @@ public class Main {
 
         /*
          * ========================================
-         * OpenGL 設定
+         * OpenGL設定
          * ========================================
          */
 
@@ -40,6 +45,10 @@ public class Main {
                 3
         );
 
+        /*
+         * 今は固定機能パイプラインを使うため
+         * Compatibility Profileを使用
+         */
         GLFW.glfwWindowHint(
                 GLFW.GLFW_OPENGL_PROFILE,
                 GLFW.GLFW_OPENGL_COMPAT_PROFILE
@@ -185,7 +194,9 @@ public class Main {
 
             float cameraSpeed = 1.0f;
 
-            // 左
+            /*
+             * 左
+             */
             if (GLFW.glfwGetKey(
                     window,
                     GLFW.GLFW_KEY_LEFT
@@ -197,7 +208,9 @@ public class Main {
                 );
             }
 
-            // 右
+            /*
+             * 右
+             */
             if (GLFW.glfwGetKey(
                     window,
                     GLFW.GLFW_KEY_RIGHT
@@ -209,7 +222,9 @@ public class Main {
                 );
             }
 
-            // 上
+            /*
+             * 上
+             */
             if (GLFW.glfwGetKey(
                     window,
                     GLFW.GLFW_KEY_UP
@@ -221,7 +236,9 @@ public class Main {
                 );
             }
 
-            // 下
+            /*
+             * 下
+             */
             if (GLFW.glfwGetKey(
                     window,
                     GLFW.GLFW_KEY_DOWN
@@ -246,7 +263,7 @@ public class Main {
 
             /*
              * ====================================
-             * ウィンドウサイズ取得
+             * framebufferサイズ取得
              * ====================================
              */
 
@@ -285,15 +302,9 @@ public class Main {
 
             /*
              * ====================================
-             * Projection
+             * Projection Matrix
              * ====================================
              */
-
-            GL11.glMatrixMode(
-                    GL11.GL_PROJECTION
-            );
-
-            GL11.glLoadIdentity();
 
             float aspect =
                     (float) framebufferWidth
@@ -305,75 +316,54 @@ public class Main {
 
             float far = 100.0f;
 
-            float top =
-                    (float) Math.tan(
-                            Math.toRadians(
-                                    fov / 2.0f
-                            )
-                    ) * near;
+            Matrix4f projection =
+                    new Matrix4f();
 
-            float bottom = -top;
-
-            float right =
-                    top * aspect;
-
-            float left =
-                    -right;
-
-            GL11.glFrustum(
-                    left,
-                    right,
-                    bottom,
-                    top,
+            projection.perspective(
+                    (float) Math.toRadians(fov),
+                    aspect,
                     near,
                     far
             );
 
             /*
+             * OpenGLにProjection Matrixを渡す
+             */
+
+            FloatBuffer projectionBuffer =
+                    BufferUtils.createFloatBuffer(16);
+
+            projection.get(
+                    projectionBuffer
+            );
+
+            GL11.glMatrixMode(
+                    GL11.GL_PROJECTION
+            );
+
+            GL11.glLoadMatrixf(
+                    projectionBuffer
+            );
+
+            /*
              * ====================================
-             * ModelView
+             * Camera View Matrix
              * ====================================
              */
+
+            FloatBuffer viewBuffer =
+                    BufferUtils.createFloatBuffer(16);
+
+            camera.getViewMatrix().get(
+                    viewBuffer
+            );
 
             GL11.glMatrixMode(
                     GL11.GL_MODELVIEW
             );
 
-            GL11.glLoadIdentity();
-
-            /*
-             * ====================================
-             * カメラテスト
-             *
-             * 今回はCameraの角度を
-             * そのままワールド回転として使用する。
-             * ====================================
-             */
-
-            GL11.glRotatef(
-                    camera.getYaw(),
-                    0.0f,
-                    1.0f,
-                    0.0f
-            );
-
-            GL11.glRotatef(
-                    camera.getPitch(),
-                    1.0f,
-                    0.0f,
-                    0.0f
-            );
-
-            /*
-             * ====================================
-             * カメラ位置
-             * ====================================
-             */
-
-            GL11.glTranslatef(
-                    -camera.getX(),
-                    -camera.getY(),
-                    -camera.getZ()
+            GL11.glLoadMatrixf(
+                    viewBuffer
             );
 
             /*
@@ -409,7 +399,7 @@ public class Main {
 
         /*
          * ========================================
-         * 終了
+         * 終了処理
          * ========================================
          */
 
