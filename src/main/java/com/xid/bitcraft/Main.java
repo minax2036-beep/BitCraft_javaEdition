@@ -12,14 +12,24 @@ public class Main {
 
         System.out.println("BitCraft starting...");
 
-        // GLFW初期化
+        /*
+         * ========================================
+         * GLFW 初期化
+         * ========================================
+         */
+
         if (!GLFW.glfwInit()) {
             throw new IllegalStateException(
                     "GLFW initialization failed."
             );
         }
 
-        // OpenGL 3.3
+        /*
+         * ========================================
+         * OpenGL 設定
+         * ========================================
+         */
+
         GLFW.glfwWindowHint(
                 GLFW.GLFW_CONTEXT_VERSION_MAJOR,
                 3
@@ -30,13 +40,17 @@ public class Main {
                 3
         );
 
-        // 今はOpenGLの固定機能を使うのでCompatibility Profile
         GLFW.glfwWindowHint(
                 GLFW.GLFW_OPENGL_PROFILE,
                 GLFW.GLFW_OPENGL_COMPAT_PROFILE
         );
 
-        // ウィンドウ設定
+        /*
+         * ========================================
+         * ウィンドウ設定
+         * ========================================
+         */
+
         GLFW.glfwWindowHint(
                 GLFW.GLFW_DECORATED,
                 GLFW.GLFW_TRUE
@@ -52,7 +66,12 @@ public class Main {
                 GLFW.GLFW_FALSE
         );
 
-        // ウィンドウ作成
+        /*
+         * ========================================
+         * ウィンドウ作成
+         * ========================================
+         */
+
         long window = GLFW.glfwCreateWindow(
                 1280,
                 720,
@@ -62,6 +81,7 @@ public class Main {
         );
 
         if (window == 0) {
+
             GLFW.glfwTerminate();
 
             throw new IllegalStateException(
@@ -69,7 +89,6 @@ public class Main {
             );
         }
 
-        // ウィンドウ装飾を有効化
         GLFW.glfwSetWindowAttrib(
                 window,
                 GLFW.GLFW_DECORATED,
@@ -78,29 +97,34 @@ public class Main {
 
         GLFW.glfwRestoreWindow(window);
 
-        // OpenGLコンテキストを現在のスレッドに設定
+        /*
+         * ========================================
+         * OpenGLコンテキスト
+         * ========================================
+         */
+
         GLFW.glfwMakeContextCurrent(window);
 
-        // VSync
         GLFW.glfwSwapInterval(1);
 
-        // ウィンドウ表示
         GLFW.glfwShowWindow(window);
 
-        // OpenGL機能を初期化
         GL.createCapabilities();
 
-        // 深度テスト
+        /*
+         * ========================================
+         * OpenGL基本設定
+         * ========================================
+         */
+
         GL11.glEnable(
                 GL11.GL_DEPTH_TEST
         );
 
-        // テクスチャ
         GL11.glEnable(
                 GL11.GL_TEXTURE_2D
         );
 
-        // 背景色
         GL11.glClearColor(
                 0.2f,
                 0.6f,
@@ -108,13 +132,28 @@ public class Main {
                 1.0f
         );
 
-        // カメラ
+        /*
+         * ========================================
+         * Camera
+         * ========================================
+         */
+
         camera = new Camera();
 
-        // ブロック登録
+        /*
+         * ========================================
+         * ブロック登録
+         * ========================================
+         */
+
         Blocks.init();
 
-        // ESCで終了
+        /*
+         * ========================================
+         * ESCキー
+         * ========================================
+         */
+
         GLFW.glfwSetKeyCallback(
                 window,
                 (windowHandle, key, scancode, action, mods) -> {
@@ -130,16 +169,20 @@ public class Main {
                 }
         );
 
-        // メインループ
+        /*
+         * ========================================
+         * メインループ
+         * ========================================
+         */
+
         while (!GLFW.glfwWindowShouldClose(window)) {
 
             /*
-             * ========================================
+             * ====================================
              * 入力
-             * ========================================
+             * ====================================
              */
 
-            // カメラ回転速度
             float cameraSpeed = 1.0f;
 
             // 左
@@ -191,9 +234,9 @@ public class Main {
             }
 
             /*
-             * ========================================
+             * ====================================
              * 画面クリア
-             * ========================================
+             * ====================================
              */
 
             GL11.glClear(
@@ -202,9 +245,9 @@ public class Main {
             );
 
             /*
-             * ========================================
+             * ====================================
              * ウィンドウサイズ取得
-             * ========================================
+             * ====================================
              */
 
             int[] width = new int[1];
@@ -219,14 +262,18 @@ public class Main {
             int framebufferWidth = width[0];
             int framebufferHeight = height[0];
 
-            if (framebufferHeight == 0) {
+            if (framebufferWidth <= 0) {
+                framebufferWidth = 1;
+            }
+
+            if (framebufferHeight <= 0) {
                 framebufferHeight = 1;
             }
 
             /*
-             * ========================================
+             * ====================================
              * Viewport
-             * ========================================
+             * ====================================
              */
 
             GL11.glViewport(
@@ -237,9 +284,9 @@ public class Main {
             );
 
             /*
-             * ========================================
+             * ====================================
              * Projection
-             * ========================================
+             * ====================================
              */
 
             GL11.glMatrixMode(
@@ -253,13 +300,15 @@ public class Main {
                             / (float) framebufferHeight;
 
             float fov = 70.0f;
+
             float near = 0.1f;
+
             float far = 100.0f;
 
             float top =
                     (float) Math.tan(
                             Math.toRadians(
-                                    fov / 2.0
+                                    fov / 2.0f
                             )
                     ) * near;
 
@@ -281,9 +330,9 @@ public class Main {
             );
 
             /*
-             * ========================================
-             * Camera / View
-             * ========================================
+             * ====================================
+             * ModelView
+             * ====================================
              */
 
             GL11.glMatrixMode(
@@ -293,28 +342,34 @@ public class Main {
             GL11.glLoadIdentity();
 
             /*
-             * 上下を見る
+             * ====================================
+             * カメラテスト
+             *
+             * 今回はCameraの角度を
+             * そのままワールド回転として使用する。
+             * ====================================
              */
+
             GL11.glRotatef(
-                    -camera.getPitch(),
+                    camera.getYaw(),
+                    0.0f,
+                    1.0f,
+                    0.0f
+            );
+
+            GL11.glRotatef(
+                    camera.getPitch(),
                     1.0f,
                     0.0f,
                     0.0f
             );
 
             /*
-             * 左右を見る
+             * ====================================
+             * カメラ位置
+             * ====================================
              */
-            GL11.glRotatef(
-                    -camera.getYaw(),
-                    0.0f,
-                    1.0f,
-                    0.0f
-            );
 
-            /*
-             * カメラ位置を反映
-             */
             GL11.glTranslatef(
                     -camera.getX(),
                     -camera.getY(),
@@ -322,9 +377,9 @@ public class Main {
             );
 
             /*
-             * ========================================
+             * ====================================
              * ブロック描画
-             * ========================================
+             * ====================================
              */
 
             Block block = Blocks.STONE;
@@ -336,22 +391,25 @@ public class Main {
             );
 
             /*
-             * ========================================
+             * ====================================
              * 画面更新
-             * ========================================
+             * ====================================
              */
 
             GLFW.glfwSwapBuffers(window);
 
             /*
+             * ====================================
              * イベント処理
+             * ====================================
              */
+
             GLFW.glfwPollEvents();
         }
 
         /*
          * ========================================
-         * 終了処理
+         * 終了
          * ========================================
          */
 
